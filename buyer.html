@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokoKita - Belanja Online</title>
+  
+  <!-- Tailwind CSS & Supabase & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Header Pembeli -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchBuyerTab('shop')">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight text-slate-900">TokoKita</h1>
+          <p class="text-xs text-slate-500 font-medium">Portal Pembeli</p>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-md hidden md:block">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="search-input" placeholder="Cari produk impianmu..." oninput="filterProducts()" 
+                 class="w-full pl-9 pr-4 py-2 bg-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 border border-transparent focus:border-indigo-500 transition-all">
+        </div>
+      </div>
+
+      <!-- Navigasi Kanan -->
+      <div class="flex items-center gap-3">
+        <button onclick="switchBuyerTab('orders')" class="px-3 py-2 text-slate-600 hover:text-indigo-600 font-medium text-sm rounded-lg flex items-center gap-2 hover:bg-slate-100 transition">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Pesanan Saya</span>
+        </button>
+
+        <button onclick="toggleCartModal(true)" class="relative p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition shadow-sm">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white hidden">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Konten Utama Pembeli -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <!-- Search Mobile -->
+    <div class="md:hidden mb-6">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" id="search-input-mobile" placeholder="Cari produk..." oninput="filterProductsMobile()" 
+               class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+      </div>
+    </div>
+
+    <!-- Tab Katalog -->
+    <section id="tab-shop">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Katalog Produk</h2>
+          <p class="text-sm text-slate-500">Barang berkualitas dengan harga terbaik</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Real-Time Sinkron
+        </span>
+      </div>
+
+      <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Produk dirender otomatis via JS -->
+      </div>
+    </section>
+
+    <!-- Tab Pesanan Saya -->
+    <section id="tab-orders" class="hidden">
+      <h2 class="text-xl font-bold text-slate-900 mb-4">Riwayat Pesanan Saya</h2>
+      <div id="buyer-orders-list" class="space-y-4">
+        <!-- Pesanan dirender otomatis via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-400">
+    <p>© 2026 TokoKita Marketplace. Hak cipta dilindungi.</p>
+  </footer>
+
+  <!-- Modal Keranjang -->
+  <div id="modal-cart" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex justify-end hidden">
+    <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="shopping-cart" class="w-5 h-5 text-indigo-600"></i> Keranjang Belanja
+        </h3>
+        <button onclick="toggleCartModal(false)" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="cart-items-container" class="flex-grow overflow-y-auto p-4 space-y-3">
+        <!-- Item keranjang -->
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-3">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-500 font-medium">Total Pembayaran</span>
+          <span id="cart-total" class="text-lg font-bold text-indigo-600">Rp 0</span>
+        </div>
+        <button onclick="checkout()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+          Checkout Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <script src="buyer.js"></script>
+</body>
+</html>
