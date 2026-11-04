@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace Digital</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- ==================== VIEW 1: PORTAL PEMBELI ==================== -->
+  <div id="buyer-view" class="flex-grow flex flex-col">
+    <!-- Header Pembeli -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchBuyerTab('shop')">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-lg leading-tight text-slate-900">TokoKita</h1>
+            <p class="text-xs text-slate-500 font-medium">Marketplace Online</p>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md hidden md:block">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="search-input" placeholder="Cari produk impianmu..." oninput="filterProducts()" 
+                   class="w-full pl-9 pr-4 py-2 bg-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 border border-transparent focus:border-indigo-500 transition-all">
+          </div>
+        </div>
+
+        <!-- Right Nav Buttons -->
+        <div class="flex items-center gap-3">
+          <button onclick="switchBuyerTab('orders')" class="px-3 py-2 text-slate-600 hover:text-indigo-600 font-medium text-sm rounded-lg flex items-center gap-2 hover:bg-slate-100 transition">
+            <i data-lucide="package" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Pesanan Saya</span>
+          </button>
+
+          <button onclick="toggleCartModal(true)" class="relative p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition shadow-sm">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+            <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white hidden">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Pembeli -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+      <!-- Search Mobile -->
+      <div class="md:hidden mb-6">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="search-input-mobile" placeholder="Cari produk..." oninput="filterProductsMobile()" 
+                 class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+        </div>
+      </div>
+
+      <!-- Tab Content: Katalog Produk -->
+      <section id="tab-shop">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Katalog Produk</h2>
+            <p class="text-sm text-slate-500">Temukan barang berkualitas dengan harga terbaik</p>
+          </div>
+          <span id="live-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
+          </span>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <!-- Item produk dirender lewat JS -->
+        </div>
+      </section>
+
+      <!-- Tab Content: Pesanan Saya -->
+      <section id="tab-orders" class="hidden">
+        <h2 class="text-xl font-bold text-slate-900 mb-4">Riwayat Pesanan Saya</h2>
+        <div id="buyer-orders-list" class="space-y-4">
+          <!-- Item pesanan dirender lewat JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Tersembunyi (Akses Penjual) -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+      <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p>© 2026 TokoKita Marketplace. Hak cipta dilindungi.</p>
+        <a href="#seller" onclick="openSellerAuthModal()" class="text-slate-400 hover:text-slate-600 transition underline">
+          Akses Portal Penjual
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== VIEW 2: PORTAL PENJUAL (ADMIN) ==================== -->
+  <div id="seller-view" class="hidden flex-grow flex flex-col bg-slate-900 text-slate-100">
+    <!-- Topbar Penjual -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-amber-500 text-slate-900 flex items-center justify-center font-bold">
+            <i data-lucide="store" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base leading-tight text-white">Dashboard Penjual</h1>
+            <span class="text-xs text-amber-400 font-medium">Mode Manajemen Produk & Pesanan</span>
+          </div>
+        </div>
+
+        <button onclick="logoutSeller()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+      <!-- Action & Stats -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-2xl font-bold text-white">Kelola Toko</h2>
+        <button onclick="openProductModal()" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Produk Baru
+        </button>
+      </div>
+
+      <!-- Seller Tabs -->
+      <div class="border-b border-slate-700 flex gap-6">
+        <button id="btn-seller-tab-products" onclick="switchSellerTab('products')" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 font-bold text-sm flex items-center gap-2">
+          <i data-lucide="package" class="w-4 h-4"></i> Katalog Produk
+        </button>
+        <button id="btn-seller-tab-orders" onclick="switchSellerTab('orders')" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-semibold text-sm flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Pesanan Masuk
+        </button>
+      </div>
+
+      <!-- Section Produk Penjual -->
+      <section id="seller-tab-products">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900/50 text-slate-400 font-semibold border-b border-slate-700 uppercase text-xs">
+                <tr>
+                  <th class="p-4">Produk</th>
+                  <th class="p-4">Harga</th>
+                  <th class="p-4">Stok</th>
+                  <th class="p-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="seller-product-table" class="divide-y divide-slate-700/50">
+                <!-- Data tabel produk dirender lewat JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Pesanan Penjual -->
+      <section id="seller-tab-orders" class="hidden">
+        <div id="seller-orders-list" class="space-y-4">
+          <!-- Data pesanan dirender lewat JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== MODAL AUTH PENJUAL ==================== -->
+  <div id="modal-seller-auth" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative">
+      <button onclick="closeSellerAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Portal Penjual</h3>
+        <p class="text-xs text-slate-500 mt-1">Masukkan PIN Keamanan untuk Masuk</p>
+      </div>
+
+      <form onsubmit="handleSellerLogin(event)" class="space-y-4">
+        <div>
+          <input type="password" id="seller-pin-input" placeholder="Masukkan PIN (Default: 1234)" maxlength="6" required 
+                 class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-center text-lg tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+          Masuk Dashboard
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL FORM PRODUK (TAMBAH/EDIT) ==================== -->
+  <div id="modal-product-form" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-700 relative">
+      <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <h3 id="product-form-title" class="text-lg font-bold text-white mb-4">Tambah Produk Baru</h3>
+
+      <form onsubmit="saveProduct(event)" class="space-y-4">
+        <input type="hidden" id="form-product-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Produk</label>
+          <input type="text" id="form-product-name" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Harga (Rp)</label>
+            <input type="number" id="form-product-price" min="0" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Stok</label>
+            <input type="number" id="form-product-stock" min="0" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">URL Gambar Produk</label>
+          <input type="url" id="form-product-image" required placeholder="https://..." class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Deskripsi Produk</label>
+          <textarea id="form-product-desc" rows="3" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL KERANJANG ==================== -->
+  <div id="modal-cart" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex justify-end hidden">
+    <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="shopping-cart" class="w-5 h-5 text-indigo-600"></i> Keranjang Belanja
+        </h3>
+        <button onclick="toggleCartModal(false)" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="cart-items-container" class="flex-grow overflow-y-auto p-4 space-y-3">
+        <!-- Item keranjang dirender via JS -->
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-3">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-500 font-medium">Total Pembayaran</span>
+          <span id="cart-total" class="text-lg font-bold text-indigo-600">Rp 0</span>
+        </div>
+        <button onclick="checkout()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+          Checkout Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+</body>
+</html>
