@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f766e"><title>PasarKita — Belanja dari Penjual Lokal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="GANTI_DENGAN_MIDTRANS_CLIENT_KEY" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>Pasar<span class="brand-accent">Kita</span><small>MARKETPLACE LOKAL</small></span></a>
+  <div class="search-wrap"><span>⌕</span><input id="searchInput" placeholder="Cari produk, kategori, atau kebutuhan..." autocomplete="off"></div>
+  <nav class="nav-actions"><a class="nav-link" href="#catalog">Jelajahi</a><a class="nav-link" id="sellerLink" href="seller.html" hidden>Dashboard</a>
+    <button class="btn btn-ghost" id="loginBtn">Masuk</button><button class="btn btn-primary" id="registerBtn">Daftar</button>
+    <button class="btn btn-ghost" id="accountBtn" hidden>Akun ▾</button><button class="cart-button" id="cartOpen" aria-label="Keranjang">Bag <b id="cartCount">0</b></button>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy"><span class="eyebrow">BELANJA LEBIH DEKAT</span><h1>Temukan produk lokal.<br><em>Dukung usaha sekitar.</em></h1>
+      <p>Jelajahi pilihan produk dari penjual lokal dengan pengalaman belanja yang sederhana dan nyaman.</p>
+      <a class="btn btn-light" href="#catalog">Mulai jelajahi <span>↗</span></a>
+      <div class="hero-proof"><span>✓ Produk dari penjual lokal</span><span>✓ Pembayaran terintegrasi</span></div>
+    </div><div class="hero-art"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-card"><span class="art-tag">PILIHAN LOKAL</span><div class="art-bag">PK</div><strong>Belanja dengan makna.</strong><small>Temukan sesuatu yang baru hari ini.</small></div><div class="float-chip chip-a">✦ Pilihan menarik</div><div class="float-chip chip-b">♡ Dukung lokal</div></div>
+  </section>
+  <section class="trust-strip"><div><b>01</b><span>Temukan produk</span></div><div><b>02</b><span>Pilih dan checkout</span></div><div><b>03</b><span>Pantau pesanan</span></div></section>
+  <section class="section" id="catalog"><div class="section-heading"><div><span class="eyebrow">KURASI PASARKITA</span><h2>Jelajahi produk</h2><p>Temukan kebutuhan dan produk favoritmu.</p></div><span class="result-count" id="resultCount">Memuat produk…</span></div>
+    <div class="category-row" id="categoryRow"><button class="category active" data-category="all">Semua</button><button class="category" data-category="Elektronik">Elektronik</button><button class="category" data-category="Pakaian">Pakaian</button><button class="category" data-category="Makanan">Makanan</button><button class="category" data-category="Lainnya">Lainnya</button></div>
+    <div class="product-grid" id="productGrid"><div class="empty-state">Memuat katalog produk…</div></div>
+  </section>
+  <section class="seller-cta"><div><span class="eyebrow">PUNYA USAHA?</span><h2>Jadikan produkmu bagian dari PasarKita.</h2><p>Kelola katalog dan pesanan melalui dashboard penjual.</p></div><a href="seller.html" class="btn btn-dark">Mulai berjualan ↗</a></section>
+</main>
+<footer><a class="brand footer-brand" href="#"><span class="brand-mark">P</span><span>Pasar<span class="brand-accent">Kita</span><small>MARKETPLACE LOKAL</small></span></a><span>© <span id="year"></span> PasarKita. Belanja dekat, dukung lokal.</span></footer>
+
+<div class="overlay" id="authModal" aria-hidden="true"><section class="modal"><button class="modal-close" data-close="authModal">×</button><span class="eyebrow">SELAMAT DATANG</span><h2 id="authTitle">Masuk ke PasarKita</h2><p id="authDescription">Gunakan akunmu untuk melanjutkan.</p><form id="authForm" class="form-stack"><label id="nameField" hidden>Nama lengkap<input id="authName" autocomplete="name"></label><label>Email<input id="authEmail" type="email" required autocomplete="email"></label><label>Password<input id="authPassword" type="password" required minlength="8" autocomplete="current-password"></label><button class="btn btn-primary btn-wide" id="authSubmit">Masuk</button></form><p class="form-switch"><span id="authSwitchText">Belum punya akun?</span> <button id="authSwitch">Daftar</button></p></section></div>
+
+<div class="overlay drawer-overlay" id="cartDrawer" aria-hidden="true"><section class="drawer"><div class="drawer-head"><div><span class="eyebrow">PESANANMU</span><h2>Keranjang</h2></div><button class="modal-close" data-close="cartDrawer">×</button></div><div id="cartItems" class="cart-items"></div><div class="drawer-bottom"><div class="total-row"><span>Subtotal</span><strong id="cartTotal">Rp0</strong></div><button class="btn btn-primary btn-wide" id="checkoutBtn">Lanjut checkout</button><small>Biaya pengiriman dihitung pada tahap checkout.</small></div></section></div>
+
+<div class="overlay" id="checkoutModal" aria-hidden="true"><section class="modal modal-large"><button class="modal-close" data-close="checkoutModal">×</button><span class="eyebrow">LANGKAH TERAKHIR</span><h2>Checkout pesanan</h2><p>Pastikan alamat dan ringkasan pesanan sudah benar.</p><form id="checkoutForm" class="form-stack"><div class="form-grid"><label>Nama penerima<input id="shipName" required maxlength="100"></label><label>Nomor telepon<input id="shipPhone" required maxlength="24" inputmode="tel"></label></div><label>Alamat lengkap<textarea id="shipAddress" required maxlength="500" rows="3"></textarea></label><div class="form-grid"><label>Metode pengiriman<select id="shippingMethod"><option value="manual">Atur dengan penjual (manual)</option><option value="courier">Kurir / ongkir terintegrasi (jika dikonfigurasi)</option></select></label><label>Catatan untuk penjual<input id="orderNote" maxlength="250" placeholder="Opsional"></label></div><div class="checkout-summary"><div><span>Subtotal</span><b id="checkoutSubtotal">Rp0</b></div><div><span>Ongkir</span><b id="checkoutShipping">Dikonfirmasi penjual</b></div><div class="grand-total"><span>Total sementara</span><b id="checkoutGrand">Rp0 + ongkir</b></div></div><button class="btn btn-primary btn-wide" id="payBtn">Buat pesanan & lanjut bayar</button><small>Transaksi menggunakan Midtrans Sandbox selama tahap pengujian. Ongkir kurir otomatis memerlukan akun dan API penyedia logistik.</small></form></section></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body></html>
